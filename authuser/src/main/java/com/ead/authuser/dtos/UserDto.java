@@ -1,7 +1,5 @@
 package com.ead.authuser.dtos;
 
-import com.ead.authuser.enums.UserStatus;
-import com.ead.authuser.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;

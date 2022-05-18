@@ -52,7 +52,7 @@ public class UserController {
 
     @PutMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable(value = "userId") UUID userId,
-                                             @JsonView(UserDto.UserView.UserPut.class) UserDto userDto ){
+                                             @RequestBody @JsonView(UserDto.UserView.UserPut.class) UserDto userDto ){
 
         Optional<UserModel> userModelOptional = userService.findById(userId);
 
@@ -70,9 +70,9 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/{userId}/password")
     public ResponseEntity<Object> updatePassword(@PathVariable(value = "userId") UUID userId,
-                                             @JsonView(UserDto.UserView.PasswordPut.class) UserDto userDto ){
+                                                 @RequestBody @JsonView(UserDto.UserView.PasswordPut.class) UserDto userDto ){
 
         Optional<UserModel> userModelOptional = userService.findById(userId);
 
@@ -85,6 +85,24 @@ public class UserController {
         } else {
             var userModel = userModelOptional.get();
             userModel.setPassword(userDto.getPassword());
+            userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
+            userService.save(userModel);
+            return ResponseEntity.status(HttpStatus.OK).body("Password updated sucessfully");
+        }
+    }
+
+    @PutMapping("/{userId}/image")
+    public ResponseEntity<Object> updateImage(@PathVariable(value = "userId") UUID userId,
+                                              @RequestBody @JsonView(UserDto.UserView.ImagePut.class) UserDto userDto ){
+
+        Optional<UserModel> userModelOptional = userService.findById(userId);
+
+        if( !userModelOptional.isPresent() ) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+
+        } else {
+            var userModel = userModelOptional.get();
+            userModel.setImageUrl(userDto.getImageUrl());
             userModel.setLastUpdateDate(LocalDateTime.now(ZoneId.of("UTC")));
             userService.save(userModel);
             return ResponseEntity.status(HttpStatus.OK).body(userModel);
