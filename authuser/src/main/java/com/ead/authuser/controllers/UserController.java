@@ -14,7 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -36,6 +37,11 @@ public class UserController {
 
         Page<UserModel> userModelPage = userService.findAll(spec, pageable);
 
+        if(!userModelPage.isEmpty()) {
+            for(UserModel user : userModelPage.toList()) {
+                user.add(linkTo(methodOn(UserController.class).getOneUser(user.getUserId())).withSelfRel());
+            }
+        }
         return ResponseEntity.status(HttpStatus.OK).body(userModelPage);
     }
 
@@ -53,7 +59,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Object> deleteUser(@PathVariable(value = "userId") UUID userId) {
         Optional<UserModel> userModelOptional = userService.findById(userId);
-        if( !userModelOptional.isPresent() ) {
+        if(userModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         } else {
             userService.delete(userModelOptional.get());
@@ -68,7 +74,7 @@ public class UserController {
 
         Optional<UserModel> userModelOptional = userService.findById(userId);
 
-        if( !userModelOptional.isPresent() ) {
+        if(userModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
 
         } else {
@@ -89,7 +95,7 @@ public class UserController {
 
         Optional<UserModel> userModelOptional = userService.findById(userId);
 
-        if( !userModelOptional.isPresent() ) {
+        if(userModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
 
         } if (!userModelOptional.get().getPassword().equals(userDto.getOldPassword())) {
@@ -111,7 +117,7 @@ public class UserController {
 
         Optional<UserModel> userModelOptional = userService.findById(userId);
 
-        if( !userModelOptional.isPresent() ) {
+        if(userModelOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
 
         } else {
